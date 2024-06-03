@@ -1,0 +1,3 @@
+data_ingestion:
+  download_dir: data # Dataset Download Path
+  dataset_id: balraj98/deepglobe-road-extraction-dataset # Kaggle Dataset ID

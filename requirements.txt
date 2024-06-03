@@ -1,0 +1,13 @@
+python-box==7.1.1
+albumentations==1.4.8
+ensure==1.0.4
+joblib==1.4.2
+kaggle==1.6.14
+matplotlib==3.9.0
+numpy==1.26.4
+pandas==2.2.2
+PyYAML==6.0.1
+segmentation_models_pytorch==0.3.3
+setuptools==68.2.2
+torch==2.3.0
+nbconvert==7.16.4

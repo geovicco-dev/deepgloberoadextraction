@@ -2,3 +2,6 @@ data
 models
 plots
 logs
+.venv
+*.egg-info
+__pycache__

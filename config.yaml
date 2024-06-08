@@ -1,3 +1,7 @@
 data_ingestion:
   download_dir: data # Dataset Download Path
   dataset_id: balraj98/deepglobe-road-extraction-dataset # Kaggle Dataset ID
+
+data_preparation:
+  data_dir: data # Dataset Directory
+  metadata_csv: data/metadata.csv # Metadata CSV

@@ -6,3 +6,4 @@ logs
 *.egg-info
 __pycache__
 secrets.yaml
+.DS_Store

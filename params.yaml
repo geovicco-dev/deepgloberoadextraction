@@ -1,0 +1,8 @@
+random_state: 26
+
+data_preparation:
+  train_val_split: [0.7, 0.2, 0.1] # Train - Test - Val Split Ratio
+  batch_size: 2
+  num_workers: 8
+  prefetch_factor: 2
+  resize_dimension: 256

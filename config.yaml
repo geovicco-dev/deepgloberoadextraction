@@ -5,3 +5,13 @@ data_ingestion:
 data_preparation:
   data_dir: data # Dataset Directory
   metadata_csv: data/metadata.csv # Metadata CSV
+  out_metadata_csv: data/metadataV2.csv # Output Metadata CSV after Splitting Training into Training, Testing and Validation Sets
+
+training:
+  models_dir: models # Model Directory
+  metadata_csv: data/metadataV2.csv # Metadata CSV
+  logs_dir: logs # Logs Directory
+
+evaluation:
+  results_dir: results # Results Directory
+  metrics_filepath: resutls/metrics.json # Metrics Filepath 

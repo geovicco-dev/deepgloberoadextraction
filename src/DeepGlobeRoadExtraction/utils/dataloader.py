@@ -85,9 +85,9 @@ class RoadsDataset(torch.utils.data.Dataset):
 
 #### PyTorch Lightning Data Module ####
 class RoadsDataModule(L.LightningDataModule):
-    def __init__(self, metadata_df, train_augmentation=None, val_augmentation=None, batch_size=8, prefetch_factor=8, num_workers=4, resize_dimensions=256):
+    def __init__(self, metadata_csv, train_augmentation=None, val_augmentation=None, batch_size=8, prefetch_factor=8, num_workers=4, resize_dimensions=256):
         super().__init__()
-        self.metadata = metadata_df
+        self.metadata = pd.read_csv(metadata_csv)  # Load metadata_csv
         self.train_augmentation = train_augmentation
         self.val_augmentation = val_augmentation
         self.batch_size = batch_size
@@ -119,8 +119,8 @@ def get_training_augmentation():
         A.HorizontalFlip(p=0.5),  # horizontal flip
         A.VerticalFlip(p=0.5),  # vertical flip
         A.Rotate(limit=90),  # 90 degree rotation
-        A.ColorJitter(p=0.2),  # color jitter
-        A.RandomBrightnessContrast(p=0.2),  # random brightness and contrast
+        # A.ColorJitter(p=0.2),  # color jitter
+        # A.RandomBrightnessContrast(p=0.2),  # random brightness and contrast
         A.RandomGamma(p=0.2),  # random gamma
         A.GaussNoise(p=0.2),  # gaussian noise
     ]

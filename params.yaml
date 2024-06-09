@@ -1,8 +1,26 @@
 random_state: 26
 
-data_preparation:
-  train_val_split: [0.7, 0.2, 0.1] # Train - Test - Val Split Ratio
-  batch_size: 2
-  num_workers: 8
-  prefetch_factor: 2
-  resize_dimension: 256
+# Data Preparation
+train_val_split: [0.7, 0.2, 0.1] # Train - Test - Val Split Ratio
+
+# Data Loader
+batch_size: 12
+num_workers: 32
+prefetch_factor: 12
+resize_dimension: 1024
+
+# Training
+epochs: 25
+learning_rate: 0.0001
+num_classes: 1
+num_channels: 3
+model_name: DeepLabV3Plus
+accelerator: auto
+precision: 16
+checkpoint_path: models/checkpoints/epoch=07-val_f1=0.54.ckpt
+tune_lr: True # AutoTune Learning Rate using Lightning's Learning Rate Finder
+
+# Evaluation
+model_path: models/best.pt
+metrics: [iou, f1, precision, recall]
+

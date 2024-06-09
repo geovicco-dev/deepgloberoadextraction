@@ -1,5 +1,5 @@
 data
-./models
+models/*
 plots
 logs
 .venv
@@ -7,3 +7,5 @@ logs
 __pycache__
 secrets.yaml
 .DS_Store
+.lr_find*.ckpt
+metrics.json

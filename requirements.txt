@@ -12,6 +12,7 @@ setuptools==68.2.2
 torch==2.3.0
 nbconvert==7.16.4
 ipykernel==6.29.4
-rioxarray==0.15.5
 lightning==2.2.5
 tensorboardx==2.6.2.2
+jupyter==1.0.0
+torch-tb-profiler==0.4.3

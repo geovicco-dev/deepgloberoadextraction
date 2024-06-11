@@ -4,23 +4,28 @@ random_state: 26
 train_val_split: [0.7, 0.2, 0.1] # Train - Test - Val Split Ratio
 
 # Data Loader
-batch_size: 12
-num_workers: 32
-prefetch_factor: 12
-resize_dimension: 1024
+batch_size: 6
+num_workers: 0
+prefetch_factor: 6
+resize_dimension: 512
 
 # Training
+architecture: DeepLabV3Plus # https://smp.readthedocs.io/en/latest/models.html
+encoder: resnet18 # https://smp.readthedocs.io/en/latest/encoders.html
+encoder_weights: imagenet
 epochs: 25
 learning_rate: 0.0001
 num_classes: 1
+classes: [road]
 num_channels: 3
-model_name: DeepLabV3Plus
-accelerator: auto
+device: auto
 precision: 16
-checkpoint_path: models/checkpoints/epoch=07-val_f1=0.54.ckpt
-tune_lr: True # AutoTune Learning Rate using Lightning's Learning Rate Finder
+checkpoint_path: None
+optimizer: Adam
+metrics: [IoU, Fscore] # https://smp.readthedocs.io/en/latest/metrics.html
+loss: DiceLoss # https://smp.readthedocs.io/en/latest/losses.html
 
 # Evaluation
 model_path: models/best.pt
-metrics: [iou, f1, precision, recall]
+# metrics: [iou, f1, precision, recall]
 

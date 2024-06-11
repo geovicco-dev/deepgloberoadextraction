@@ -9,3 +9,4 @@ secrets.yaml
 .DS_Store
 .lr_find*.ckpt
 metrics.json
+lightning_logs/

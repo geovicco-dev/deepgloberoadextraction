@@ -22,7 +22,6 @@ device: auto
 precision: 16
 checkpoint_path: None
 optimizer: Adam
-metrics: [iou_score, f1_score, balanced_accuracy, precision, recall] # https://smp.readthedocs.io/en/latest/metrics.html
 loss: FocalLoss # https://smp.readthedocs.io/en/latest/losses.html
 
 # Evaluation

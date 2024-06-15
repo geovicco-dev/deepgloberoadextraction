@@ -10,7 +10,7 @@ prefetch_factor: 6
 resize_dimension: 512
 
 # Training
-architecture: DeepLabV3Plus # https://smp.readthedocs.io/en/latest/models.html
+architecture: PAN # https://smp.readthedocs.io/en/latest/models.html
 encoder: resnet18 # https://smp.readthedocs.io/en/latest/encoders.html
 encoder_weights: imagenet
 epochs: 25
@@ -22,10 +22,45 @@ device: auto
 precision: 16
 checkpoint_path: None
 optimizer: Adam
-metrics: [IoU, Fscore] # https://smp.readthedocs.io/en/latest/metrics.html
-loss: DiceLoss # https://smp.readthedocs.io/en/latest/losses.html
+metrics: [iou_score, f1_score, balanced_accuracy, precision, recall] # https://smp.readthedocs.io/en/latest/metrics.html
+loss: FocalLoss # https://smp.readthedocs.io/en/latest/losses.html
 
 # Evaluation
 model_path: models/best.pt
 # metrics: [iou, f1, precision, recall]
 
+# Available Metrics
+# iou: IoU
+# f1: Fscore
+# precision: Precision
+# recall: Recall
+
+# Available Losses
+# dice: DiceLoss
+# cross_entropy: CrossEntropyLoss
+
+# Available Optimizers
+# adam: Adam
+# sgd: SGD
+
+# Available Models
+# deeplabv3plus: DeepLabV3Plus
+# deeplabv3: DeepLabV3
+# unet: UNet
+# unetplusplus: UNetPlusPlus
+# linknet: LinkNet
+# pspnet: PSPNet
+# fpn: FPN
+# manet: MAnet
+# pan: PAN
+
+# Available Encoders
+# resnet18: ResNet18
+# resnet34: ResNet34
+# resnet50: ResNet50
+# resnet101: ResNet101
+# resnet152: ResNet152
+
+# Available Device
+# cpu: cpu
+# cuda: cuda

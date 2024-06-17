@@ -4,54 +4,66 @@ random_state: 26
 train_val_split: [0.7, 0.2, 0.1] # Train - Test - Val Split Ratio
 
 # Data Loader
-batch_size: 6
-num_workers: 0
-prefetch_factor: 6
+batch_size: 12
+num_workers: 24
+prefetch_factor: 12
 resize_dimension: 512
+apply_preprocessing: False
 
 # Training
-architecture: PAN # https://smp.readthedocs.io/en/latest/models.html
-encoder: resnet18 # https://smp.readthedocs.io/en/latest/encoders.html
+architecture: Unet # https://smp.readthedocs.io/en/latest/models.html
+encoder: resnet101 # https://smp.readthedocs.io/en/latest/encoders.html
 encoder_weights: imagenet
 epochs: 25
-learning_rate: 0.0001
-num_classes: 1
-classes: [road]
-num_channels: 3
-device: auto
-precision: 16
-checkpoint_path: None
-optimizer: Adam
-loss: FocalLoss # https://smp.readthedocs.io/en/latest/losses.html
+lr: 0.00001
+n_classes: 1
+tune_lr: False
+n_channels: 3
+device: cuda # cuda, cpu, mps, auto
+checkpoint_path: models/checkpoints/epoch=12-val_f1=0.57.ckpt # None if checkpoint not available
+optimizer: adamax
+loss: JaccardLoss # https://smp.readthedocs.io/en/latest/losses.html
 
 # Evaluation
 model_path: models/best.pt
-# metrics: [iou, f1, precision, recall]
 
 # Available Metrics
 # iou: IoU
 # f1: Fscore
+# f2: F2Score
 # precision: Precision
 # recall: Recall
 
 # Available Losses
-# dice: DiceLoss
-# cross_entropy: CrossEntropyLoss
+# DiceLoss
+# FocalLoss
+# TverskyLoss
+# JaccardLoss
+# LovaszLoss
+# SoftBCEWithLogitsLoss ---- Not Working
+# SoftCrossEntropyLoss
+# MCCLoss
 
 # Available Optimizers
 # adam: Adam
+# adamw: AdamW
+# adagrad: Adagrad
+# adadelta: Adadelta
+# adamax: Adamax
+# asgd: ASGD
 # sgd: SGD
+# rmsprop: RMSprop
 
 # Available Models
-# deeplabv3plus: DeepLabV3Plus
-# deeplabv3: DeepLabV3
-# unet: UNet
-# unetplusplus: UNetPlusPlus
-# linknet: LinkNet
-# pspnet: PSPNet
-# fpn: FPN
-# manet: MAnet
-# pan: PAN
+# DeepLabV3Plus
+# DeepLabV3
+# Unet
+# UNetPlusPlus
+# Linknet
+# PSPNet
+# FPN
+# MAnet
+# PAN
 
 # Available Encoders
 # resnet18: ResNet18
@@ -63,3 +75,4 @@ model_path: models/best.pt
 # Available Device
 # cpu: cpu
 # cuda: cuda
+# mps: mps

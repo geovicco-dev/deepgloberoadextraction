@@ -1,110 +1,110 @@
-import random
-import rioxarray as rxr
-import numpy as np
-import pandas as pd
-from pathlib import Path
+import torch
 import albumentations as A
 import cv2
-import torch
-import lightning as L
+import pandas as pd
+import numpy as np
 from torch.utils.data import DataLoader
-import warnings; warnings.filterwarnings('ignore')
 
-#### PyTorch DataLoader ####
 class RoadsDataset(torch.utils.data.Dataset):
-    def __init__(
-        self, 
-        df: pd.DataFrame,
-        split: str = 'train', 
-        augmentation = None,
-        resize_dimensions: int = 256 # H, W of Transformed Images
-    ):
-        self.image_paths = [fp for fp in df.loc[df['group'] == split]['sat_image_path'].tolist()]
-        self.mask_paths = [fp for fp in df.loc[df['group'] == split]['mask_path'].tolist()]
-        self.augmentation = augmentation
-        self.resize_dimensions = resize_dimensions
-
-    def __len__(self):
-        # return length of
-        return len(self.image_paths)
+    """DeepGlobe Road Extraction Challenge Dataset. Read images, apply augmentation and preprocessing transformations.
     
+    Args:
+        df (pd.DataFrame): DataFrame containing images / labels paths
+        split (str): Dataset split ('train', 'val', 'test')
+        augmentation (albumentations.Compose): Data transformation pipeline (e.g. flip, scale, etc.)
+        preprocessing (albumentations.Compose): Data preprocessing (e.g. normalization, shape manipulation, etc.)
+        resize_dimensions (int): Height and Width of transformed images
+    """
+    def __init__(
+            self, 
+            df: pd.DataFrame,
+            split: str = 'train', 
+            augmentation=None, 
+            preprocessing=None,
+            resize_dimensions: int = 256
+    ):
+        self.image_paths = df.loc[df['group'] == split, 'sat_image_path'].tolist()
+        self.mask_paths = df.loc[df['group'] == split, 'mask_path'].tolist()
+        self.augmentation = augmentation
+        self.preprocessing = preprocessing
+        self.resize_dimensions = resize_dimensions
+        
     @staticmethod
     def normalise_band(band):
         return (band - band.min()) / (band.max() - band.min())
-
+        
     def __getitem__(self, i):
-        # Process Image
-        x_da = rxr.open_rasterio(self.image_paths[i])
-        x_da = x_da.transpose('y', 'x', 'band')
+        # read images and masks
+        image = cv2.cvtColor(cv2.imread(self.image_paths[i]), cv2.COLOR_BGR2RGB)
         
-        # Normalise Image
-        x_da = x_da.groupby(group='band', squeeze=True).apply(self.normalise_band)
+        # Normalise image
+        image = self.normalise_band(image)
         
-        image = x_da.data
-        
-        mask = rxr.open_rasterio(self.mask_paths[i]).sel(band=1).squeeze()
-        mask = mask.transpose('y', 'x')
+        # Convert mask to grayscale
+        mask = np.expand_dims(cv2.cvtColor(cv2.imread(self.mask_paths[i]), cv2.COLOR_BGR2GRAY), axis=-1)  # Convert mask to grayscale
         mask = np.where(mask==255, 1, mask)  # Map 255 to 1
-        mask = np.expand_dims(mask, axis=-1)
-        mask = torch.from_numpy(mask.astype('long'))  # Convert to torch tensor
-        
-        # Replace nan values with 0
-        image = np.nan_to_num(x_da).astype('float32')
-        mask = np.nan_to_num(mask).astype('float32')
-        
-        # Define the target size
+                
+        # Resize transform
         target_size = (self.resize_dimensions, self.resize_dimensions)
-
-        # Create a Resize transform
         resize_transform = A.Resize(*target_size, interpolation=cv2.INTER_LINEAR)
-
-        # Ensure image and mask are numpy arrays
-        image = np.array(image)
-        mask = np.array(mask)
-
-        # Apply the Resize transform to the image and mask
         transformed = resize_transform(image=image, mask=mask)
         image, mask = transformed['image'], transformed['mask']
-
-        image = torch.from_numpy(image.copy())  # Make a copy of the numpy array
-        mask = torch.from_numpy(mask.copy())  # Make a copy of the numpy array
-
-        # Apply augmentations
+        
+        # apply augmentations
         if self.augmentation:
-            sample = self.augmentation(image=image.cpu().numpy(), mask=mask.cpu().numpy())
+            sample = self.augmentation(image=image, mask=mask)
             image, mask = sample['image'], sample['mask']
-            # Convert to torch tensors
-            image = torch.from_numpy(image.copy())
-            mask = torch.from_numpy(mask.copy())
-     
-        # Convert image and mask to (C, H, W) format
-        image = image.permute(2, 0, 1)
-        mask = mask.permute(2, 0, 1)
+        
+        # apply preprocessing
+        if self.preprocessing:
+            sample = self.preprocessing(image=image, mask=mask)
+            image, mask = sample['image'], sample['mask']
+            
+        # Convert mask to a tensor with the appropriate shape
+        image = torch.tensor(image, dtype=torch.float).permute(2, 0, 1)  # (H, W, C) -> (C, H, W)
+        mask = torch.tensor(mask, dtype=torch.long).permute(2, 0, 1)  # (H, W) -> (1, H, W)
         
         return image, mask
+        
+    def __len__(self):
+        return len(self.image_paths)
 
-#### PyTorch Lightning Data Module ####
+# PyTorch Lightning Data Module
+import pytorch_lightning as L
+
 class RoadsDataModule(L.LightningDataModule):
-    def __init__(self, metadata_csv, train_augmentation=None, val_augmentation=None, batch_size=8, prefetch_factor=8, num_workers=4, resize_dimensions=256):
+    def __init__(self, metadata_csv, 
+                 augmentation, preprocessing, batch_size, num_workers, resize_dimensions):
         super().__init__()
-        self.metadata = pd.read_csv(metadata_csv)  # Load metadata_csv
-        self.train_augmentation = train_augmentation
-        self.val_augmentation = val_augmentation
+        self.metadata = pd.read_csv(metadata_csv)
+        self.augmentation = augmentation
+        self.preprocessing = preprocessing
         self.batch_size = batch_size
-        self.prefetch_factor = prefetch_factor
         self.num_workers = num_workers
         self.resize_dimensions = resize_dimensions
-
-    def setup(self, stage=None):
-        # Assign train/val datasets for use in dataloaders
+        
+    def setup(self, stage: str = None) -> None:
         if stage == 'fit' or stage is None:
-            self.train_dataset = RoadsDataset(df=self.metadata, split='train', augmentation=self.train_augmentation, resize_dimensions=self.resize_dimensions)
-            self.val_dataset = RoadsDataset(df=self.metadata, split='val', augmentation=self.val_augmentation, resize_dimensions=self.resize_dimensions)
+            self.train_dataset = RoadsDataset(
+                df=self.metadata, split='train',
+                augmentation=self.augmentation,
+                preprocessing=self.preprocessing,
+                resize_dimensions=self.resize_dimensions
+            )
+            self.val_dataset = RoadsDataset(
+                df=self.metadata, split='val',
+                preprocessing=self.preprocessing,
+                resize_dimensions=self.resize_dimensions
+            )
         if stage == 'test':
-            self.test_dataset = RoadsDataset(df=self.metadata, split='test', resize_dimensions=self.resize_dimensions)
-
+            self.test_dataset = RoadsDataset(
+                df=self.metadata, split='test',
+                preprocessing=self.preprocessing,
+                resize_dimensions=self.resize_dimensions
+            )
+            
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, prefetch_factor=self.prefetch_factor, drop_last=True, pin_memory=True, num_workers=self.num_workers)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, drop_last=True, pin_memory=True, num_workers=self.num_workers)
 
     def val_dataloader(self):
         return DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False, drop_last=False, num_workers=self.num_workers)
@@ -112,16 +112,56 @@ class RoadsDataModule(L.LightningDataModule):
     def test_dataloader(self):
         return DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False, drop_last=False, num_workers=self.num_workers)
     
-    
 ##### Data Augmentation #####
+import numpy as np
 def get_training_augmentation():
     train_transform = [
-        A.HorizontalFlip(p=0.5),  # horizontal flip
-        A.VerticalFlip(p=0.5),  # vertical flip
-        A.Rotate(limit=90),  # 90 degree rotation
-        # A.ColorJitter(p=0.2),  # color jitter
-        # A.RandomBrightnessContrast(p=0.2),  # random brightness and contrast
         A.RandomGamma(p=0.2),  # random gamma
-        A.GaussNoise(p=0.2),  # gaussian noise
+        A.RandomBrightnessContrast(p=0.2),  # random brightness and contrast,
+        A.OneOf([
+            A.HorizontalFlip(p=0.5),  # horizontal flip
+            A.VerticalFlip(p=0.5),  # vertical flip
+            A.Rotate(limit=90),  # 90 degree rotation
+            A.Flip(p=0.5), # flip
+            A.Transpose(p=0.5), # transpose
+            A.RandomRotate90(p=0.5) # random 90 degree rotation
+        ], p=1.0),
+        A.OneOf([
+            A.ChannelShuffle(),
+            A.CoarseDropout(max_holes=np.random.randint(1, 20), max_height=np.random.randint(5, 25), max_width=np.random.randint(5, 25), mask_fill_value=0),
+            A.PixelDropout(per_channel=True),
+        ], p=1.0),
+        A.OneOf([
+            # A.Equalize(),
+            # A.CLAHE(), 
+            A.InvertImg(),  
+        ], p=0.3),
+        A.ElasticTransform(p=0.2),
+        A.RandomResizedCrop(size=(512, 512), scale=(0.5, 1.0), ratio=(0.75, 1.3333333333333333), p=0.3), # Size should equal the resize dimension parameter
     ]
-    return A.Compose(train_transform, is_check_shapes=False)
+    return A.Compose(train_transform)
+
+
+import segmentation_models_pytorch as sm_torch
+
+def to_tensor(x, **kwargs):
+    return x.transpose(0, 1, 2).astype('float32')
+    
+def get_preprocessing_function(encoder, weights):
+    preprocessing_function = sm_torch.encoders.get_preprocessing_fn(encoder, weights)
+    return preprocessing_function
+
+def get_preprocessing(preprocessing_fn=None):  
+    """Construct preprocessing transform    
+    Args:
+        preprocessing_fn (callable): data normalization function 
+            (can be specific for each pretrained neural network)
+    Return:
+        transform: albumentations.Compose
+    """
+    _transform = []
+    if preprocessing_fn:
+        _transform.append(A.Lambda(image=preprocessing_fn))
+    _transform.append(A.Lambda(image=to_tensor, mask=to_tensor))
+        
+    return A.Compose(_transform)

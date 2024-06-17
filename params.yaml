@@ -4,23 +4,23 @@ random_state: 26
 train_val_split: [0.7, 0.2, 0.1] # Train - Test - Val Split Ratio
 
 # Data Loader
-batch_size: 12
-num_workers: 24
-prefetch_factor: 12
+batch_size: 16
+num_workers: 32
+prefetch_factor: 16
 resize_dimension: 512
 apply_preprocessing: False
 
 # Training
-architecture: Unet # https://smp.readthedocs.io/en/latest/models.html
-encoder: resnet101 # https://smp.readthedocs.io/en/latest/encoders.html
+architecture: DeepLabV3Plus # https://smp.readthedocs.io/en/latest/models.html
+encoder: resnet50 # https://smp.readthedocs.io/en/latest/encoders.html
 encoder_weights: imagenet
 epochs: 25
-lr: 0.00001
+lr: 0.0001
 n_classes: 1
 tune_lr: False
 n_channels: 3
-device: cuda # cuda, cpu, mps, auto
-checkpoint_path: models/checkpoints/epoch=12-val_f1=0.57.ckpt # None if checkpoint not available
+device: auto # cuda, cpu, mps, auto
+checkpoint_path: None # None if checkpoint not available
 optimizer: adamax
 loss: JaccardLoss # https://smp.readthedocs.io/en/latest/losses.html
 

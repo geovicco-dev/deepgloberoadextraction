@@ -10,3 +10,4 @@ secrets.yaml
 .lr_find*.ckpt
 metrics.json
 lightning_logs/
+notebooks/ss

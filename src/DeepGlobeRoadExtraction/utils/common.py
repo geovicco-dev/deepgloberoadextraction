@@ -67,3 +67,8 @@ def execute_pipeline(stage_name, pipeline_class):
         logger.error(f'Failed to execute pipeline for stage: {stage_name}')
         logger.exception(e)
         raise e
+    
+def show_config(cfg: ConfigBox):
+    print("Configuration:\n")
+    for k,v in cfg.__dict__.items():
+        print(f"{k}: {v}")

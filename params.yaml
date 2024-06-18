@@ -14,18 +14,19 @@ apply_preprocessing: False
 architecture: DeepLabV3Plus # https://smp.readthedocs.io/en/latest/models.html
 encoder: resnet50 # https://smp.readthedocs.io/en/latest/encoders.html
 encoder_weights: imagenet
-epochs: 25
+epochs: 30 # Must be greter than the epoch number in the checkpoint
 lr: 0.0001
 n_classes: 1
 tune_lr: True
 n_channels: 3
 device: auto # cuda, cpu, mps, auto
-checkpoint_path: logs/DeepLabV3Plus_resnet50/checkpoints/epoch=24-val_f1=0.70.ckpt # None if checkpoint not available
-optimizer: adamax
+checkpoint_path: logs/DeepLabV3Plus_resnet50/checkpoints/epoch=22-val_f1=0.72.ckpt # None if checkpoint not available
+optimizer: sgd
 loss: JaccardLoss # https://smp.readthedocs.io/en/latest/losses.html
 
 # Evaluation
 model_path: models/best.pt
+save_predictions: True # Plots predictions on a randomly chosen batch from test dataloader and saves them as PNG
 
 # Available Metrics
 # iou: IoU

@@ -4,7 +4,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch
 import torch.optim as optim
 
-def get_optimizer(optimizer_name, parameters, lr):
+def get_optimizer(optimizer_name, parameters, lr, momentum=0.9):
     optimizer_name = optimizer_name.lower()
     
     if optimizer_name == 'adam':
@@ -18,11 +18,11 @@ def get_optimizer(optimizer_name, parameters, lr):
     elif optimizer_name == 'asgd':
         optimizer = optim.ASGD(parameters, lr=lr)
     elif optimizer_name == 'sgd':
-        optimizer = optim.SGD(parameters, lr=lr)
+        optimizer = optim.SGD(parameters, lr=lr, momentum=momentum)
     elif optimizer_name == 'adagrad':
         optimizer = optim.Adagrad(parameters, lr=lr)
     elif optimizer_name == 'rmsprop':
-        optimizer = optim.RMSprop(parameters, lr=lr)
+        optimizer = optim.RMSprop(parameters, lr=lr, momentum=momentum)
     else:
         raise ValueError(f'Unsupported optimizer: {optimizer_name}')
     

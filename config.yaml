@@ -8,10 +8,11 @@ data_preparation:
   out_metadata_csv: data/metadataV2.csv # Output Metadata CSV after Splitting Training into Training, Testing and Validation Sets
 
 training:
-  models_dir: models # Model Directory
   metadata_csv: data/metadataV2.csv # Metadata CSV
   logs_dir: logs # Logs Directory
 
 evaluation:
+  models_dir: models # Model Directory
+  metadata_csv: data/metadataV2.csv # Metadata CSV
   results_dir: results # Results Directory
-  metrics_filepath: resutls/metrics.json # Metrics Filepath 
+  metrics_filepath: results/metrics.json # Metrics Filepath 

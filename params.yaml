@@ -16,8 +16,8 @@ encoder_weights: imagenet
 epochs: 25 # Must be greter than the epoch number in the checkpoint otherwise it will throw an error. If no checkpoint is available then it will start from scratch so adjust accordingly.
 lr: 0.004
 n_classes: 1
-tune_lr: True
-dev_run: False # Only for testing purposes - executes only 1 epoch without training
+tune_lr: False
+dev_run: False # Only for testing purposes - executes only 1 epoch without training - not compatible with checkpoint
 n_channels: 3
 device: auto # cuda, cpu, mps, auto
 checkpoint_path: logs/DeepLabV3Plus_resnet50/checkpoints/epoch=22-val_f1=0.72.ckpt # None if checkpoint not available

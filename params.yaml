@@ -17,10 +17,10 @@ encoder_weights: imagenet
 epochs: 25
 lr: 0.0001
 n_classes: 1
-tune_lr: False
+tune_lr: True
 n_channels: 3
 device: auto # cuda, cpu, mps, auto
-checkpoint_path: None # None if checkpoint not available
+checkpoint_path: logs/DeepLabV3Plus_resnet50/checkpoints/epoch=24-val_f1=0.70.ckpt # None if checkpoint not available
 optimizer: adamax
 loss: JaccardLoss # https://smp.readthedocs.io/en/latest/losses.html
 

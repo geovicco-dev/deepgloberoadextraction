@@ -8,7 +8,8 @@ project_name = 'DeepGlobeRoadExtraction'
 list_of_files = [
     "data",
     "models",
-    "plots",
+    "results",
+    "results/plots",
     "docs/stages.md",
     "logs",
     f"src/{project_name}/__init__.py",

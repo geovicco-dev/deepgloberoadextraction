@@ -9,3 +9,4 @@ secrets.yaml
 .lr_find*.ckpt
 lightning_logs/
 notebooks/ss
+*.html

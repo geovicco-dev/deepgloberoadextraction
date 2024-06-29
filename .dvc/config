@@ -2,4 +2,4 @@
     autostage = true
     remote = dvc-remote
 ['remote "dvc-remote"']
-    url = ../../dvcstorage
+    url = /mnt/e/Projects/dvcstorage

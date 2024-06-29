@@ -1,0 +1,2 @@
+random_state: 26
+train_val_test_split_ratio: [0.8, 0.1, 0.1]
